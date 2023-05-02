@@ -190,7 +190,8 @@ class Garc(object):
                 break
             if  (num_gabs > gabs and gabs != -1):
                 break
-    def usercomments(self, q):
+
+    def usercomments(self, q, gabs=-1):
         """
         collect comments from a users feed
         """
@@ -198,20 +199,23 @@ class Garc(object):
         account_url = 'https://gab.com/api/v1/account_by_username/%s' % (q)
         account_id = self.get(account_url).json()['id']
         max_id = ''
-        base_url = "https://gab.com/api/v1/accounts/%s/statuses?only_comments=true&exclude_replies=false&max_id=" % (account_id)
+        base_url = "https://gab.com/api/v1/accounts/%s/statuses?only_comments=true&exclude_replies=false" % (account_id)
+        actual_endpoint = base_url 
         
         num_gabs = 0
         while True:
-            url = base_url + max_id
+            url = actual_endpoint
             resp = self.get(url)
             posts = resp.json()
             if not posts:
                 break
-            last_published_date = posts[-1]['created_at']
             for post in posts:
                 yield self.format_post(post)
                 max_id = post['id']
             num_gabs += len(posts)
+            actual_endpoint = base_url + 'max_id=' + max_id 
+            if  (num_gabs > gabs and gabs != -1):
+                break
 
     def login(self):
         """
@@ -350,7 +354,7 @@ class Garc(object):
         config = configparser.ConfigParser()
         config.read(self.config)
         if 'headers' not in config.sections():
-            user_agent = 'garc'
+            user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0'
         else:
             user_agent = config.get('headers','user_agent')
 

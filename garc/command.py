@@ -89,7 +89,7 @@ def main():
             gabs_after=args.gabs_after
         )
     elif command == 'usercomments':
-        things = g.usercomments(query)
+        things = g.usercomments(query, gabs=args.number_gabs)
     elif command == 'followers':
         things = g.followers(query)
     elif command == 'following':
