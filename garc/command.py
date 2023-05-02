@@ -8,6 +8,8 @@ import logging
 import argparse
 from garc import __version__
 from garc.client import Garc
+import re 
+
 if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
@@ -29,6 +31,12 @@ commands = [
     'top'
 ]
 
+
+cleanr = re.compile('<.*>')
+def clean_text(raw_html):
+    ''' Cleans up text based on reg exp'''
+    clean_text = re.sub(cleanr, '', raw_html)
+    return clean_text
 
 def main():
     parser = get_argparser()
@@ -55,6 +63,7 @@ def main():
         for cmd in commands:
             print(" - %s" % cmd)
         print("\nFor example:\n\n    garc search make america great again")
+        print("\nFor example:\n\n    garc usercomments username --number_gabs=40 --content_key=content")
         sys.exit(1)
 
     g = Garc(
@@ -119,15 +128,13 @@ def main():
 
     
     for thing in things:
+        context = thing
+        if (args.content_key == "content"):
+            context = clean_text(context[args.content_key])
         if args.format == "json":
-            print(json.dumps(thing), file=fh)
+            print(json.dumps(context), file=fh)
         logging.info("archived %s", thing['id'])
 
-        # if 'post' in thing or 'username' in thing:
-        #     # gabs and users
-        #     if args.format == "json":
-        #         print(json.dumps(thing), file=fh)
-        #     logging.info("archived %s", thing['id'])
 
 def get_argparser():
     """
@@ -167,6 +174,8 @@ def get_argparser():
     parser.add_argument("--gabs_after", action="store", default="2000-01-01",
                         dest="gabs_after",
                         help="approximate date of earliest gab you wish to collect")
-
+    parser.add_argument("--content_key", action="store", type=str, default="all",
+                        dest="content_key",
+                        help="clean up data to return only content key")
 
     return parser
