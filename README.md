@@ -19,13 +19,10 @@ Please be respectful when using this and any data collection software, try not t
 
 ## Installation
 
-There are two options for installing garc. 
+1. Directly from Github, which will have the newest release:
+    `pip install git+git://github.com/ashishvinayak/garc.git`
 
-1. From pypi the official python package repository, which will always have the most stable release:
-    `pip install garc`
-2. Directly from Github, which will have the newest release:
-    `pip install git+git://github.com/ChrisStevens/garc.git`
-
+2. Change the `user_agent` object in `client.py` manually to get it to work.
 
 ## Usage
 
@@ -53,6 +50,17 @@ You can also limit the number of returns with the --number_gabs parameter
     garc search maga --number_gabs=100
 
 Which will return approxiately 100 of the most recent posts.
+
+### User Comments
+
+Another way to collect posts is by user comments
+
+    garc usercomments fakeusername --number_gabs=100 --content_type content
+
+This filters the results to only display the comments without any relating json response data.
+To store the results in a file:
+
+    garc usercomments fakeusername --number_gabs=100 --content_type content --output output_file
 
 ### User Posts
 
