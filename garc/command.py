@@ -32,7 +32,7 @@ commands = [
 ]
 
 
-cleanr = re.compile('<.*>')
+cleanr = re.compile('<.*?>')
 def clean_text(raw_html):
     ''' Cleans up text based on reg exp'''
     clean_text = re.sub(cleanr, '', raw_html)

@@ -213,7 +213,7 @@ class Garc(object):
                 yield self.format_post(post)
                 max_id = post['id']
             num_gabs += len(posts)
-            actual_endpoint = base_url + 'max_id=' + max_id 
+            actual_endpoint = base_url + '&max_id=' + max_id 
             if  (num_gabs > gabs and gabs != -1):
                 break
 
