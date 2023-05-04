@@ -37,11 +37,6 @@ class Garc(object):
         self.profile = profile
         self.search_types = ['date']
 
-
-
-
-
-
         if config:
             self.config = config
         else:
@@ -50,7 +45,8 @@ class Garc(object):
         self.check_keys()
         self.load_headers()
 
-    def search(self, q, search_type='date', gabs=-1):
+    def search(self, q, search_type='date', gabs=-1, gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M"), \
+            gabs_before=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
         """
         Pass in a query. Defaults to recent sort by date.
         Defaults to retrieving as many historical gabs as possible.
@@ -63,6 +59,7 @@ class Garc(object):
 
         num_gabs = 0
         max_id = ''
+        skip_count = 0
         while True:
 
             # url = "https://gab.com/api/search?q=%s&sort=%s&before=%s" % (q, search_type, num_gabs)
@@ -87,10 +84,17 @@ class Garc(object):
                 break
             max_id = posts[-1]['id']
             for post in posts:
-                yield post
-            num_gabs += len(posts)
+                if (post['created_at'] >= gabs_after and post['created_at'] <= gabs_before):
+                    yield post
+                    num_gabs += 1
+                else:
+                    skip_count += 1
+                    print("Skipped: " + str(skip_count) + " posts. Still searching ... ", end='\r')
+                max_id = post['id']
+                    
             if  (num_gabs > gabs and gabs != -1):
                 break
+
     def public_search(self, q,  gabs=-1,gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
         """
         Pass in a query. 
@@ -191,7 +195,8 @@ class Garc(object):
             if  (num_gabs > gabs and gabs != -1):
                 break
 
-    def usercomments(self, q, gabs=-1):
+    def usercomments(self, q, gabs=-1, gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M"), \
+            gabs_before=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
         """
         collect comments from a users feed
         """
@@ -203,6 +208,7 @@ class Garc(object):
         actual_endpoint = base_url 
         
         num_gabs = 0
+        skip_count = 0
         while True:
             url = actual_endpoint
             resp = self.get(url)
@@ -210,11 +216,16 @@ class Garc(object):
             if not posts:
                 break
             for post in posts:
-                yield self.format_post(post)
-                max_id = post['id']
-            num_gabs += len(posts)
+                if (post['created_at'] >= gabs_after and post['created_at'] <= gabs_before):
+                    yield self.format_post(post)
+                    num_gabs += 1
+                else:
+                    skip_count += 1
+                    print("Skipped: " + str(skip_count) + " posts. Still searching ... ", end='\r')
+
+       
             actual_endpoint = base_url + '&max_id=' + max_id 
-            if  (num_gabs > gabs and gabs != -1):
+            if  (num_gabs > gabs and gabs != -1):     # 3 is how many tries it will do before it breaks
                 break
 
     def login(self):

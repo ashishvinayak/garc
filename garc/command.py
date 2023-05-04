@@ -12,7 +12,7 @@ import re
 
 if sys.version_info[:2] <= (2, 7):
     # Python 2
-    get_input = raw_input
+    get_input = raw_input 
     str_type = unicode
 else:
     # Python 3
@@ -79,8 +79,9 @@ def main():
         things = g.search(
             query,
             search_type=args.search_type,
-            gabs=args.number_gabs
-        )
+            gabs=args.number_gabs,
+            gabs_after=args.gabs_after,
+            gabs_before=args.gabs_before)
 
     elif command == 'user_agent':
         g.save_user_agent()
@@ -98,7 +99,7 @@ def main():
             gabs_after=args.gabs_after
         )
     elif command == 'usercomments':
-        things = g.usercomments(query, gabs=args.number_gabs)
+        things = g.usercomments(query, gabs=args.number_gabs, gabs_after=args.gabs_after, gabs_before=args.gabs_before)
     elif command == 'followers':
         things = g.followers(query)
     elif command == 'following':
@@ -131,6 +132,8 @@ def main():
         context = thing
         if (args.content_key == "content"):
             context = clean_text(context[args.content_key])
+        if (args.content_key == "created_at"):
+            context = context[args.content_key]
         if args.format == "json":
             print(json.dumps(context), file=fh)
         logging.info("archived %s", thing['id'])
@@ -174,6 +177,10 @@ def get_argparser():
     parser.add_argument("--gabs_after", action="store", default="2000-01-01",
                         dest="gabs_after",
                         help="approximate date of earliest gab you wish to collect")
+    parser.add_argument("--gabs_before", action="store", default="2030-01-01",
+                        dest="gabs_before",
+                        help="approximate date of latest gab you wish to collect")
+
     parser.add_argument("--content_key", action="store", type=str, default="all",
                         dest="content_key",
                         help="clean up data to return only content key")
