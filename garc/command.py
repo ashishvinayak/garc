@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 import sys
 import json
 import signal
@@ -126,9 +127,11 @@ def main():
     else:
         fh = sys.stdout
 
-
-    
+    count = 0
     for thing in things:
+        if count == int(args.number_gabs):
+            break
+        count += 1
         context = thing
         if (args.content_key == "content"):
             context = clean_text(context[args.content_key])
@@ -137,6 +140,10 @@ def main():
         if args.format == "json":
             print(json.dumps(context), file=fh)
         logging.info("archived %s", thing['id'])
+    # add data count to file
+    if args.output:
+        cwd = os.getcwd()
+        os.rename(os.path.join(cwd, args.output), os.path.join(cwd, args.output + '_gabCount_' + str(count)))
 
 
 def get_argparser():
